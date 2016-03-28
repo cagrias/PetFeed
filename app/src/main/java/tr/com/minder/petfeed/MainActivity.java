@@ -1,8 +1,11 @@
 package tr.com.minder.petfeed;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -32,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
     public final static String USERDATA = "tr.com.minder.petfeed.USERDATA";
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private static final String URL = "http://192.168.1.9:8000/rs/login/authenticate";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +53,8 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("Sign-in"));
-        tabLayout.addTab(tabLayout.newTab().setText("Sign-up"));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.sign_in)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.sign_up)));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
@@ -61,6 +63,24 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new LoginOnTabSelectedListener(viewPager));
+
+        SharedPreferences sharedPref1 = this.getSharedPreferences(
+                "10", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor1 = sharedPref1.edit();
+        editor1.putInt("token", 10);
+        editor1.commit();
+
+        SharedPreferences sharedPref2 = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = sharedPref2.edit();
+        editor2.putInt("token", 11);
+        editor2.commit();
+
+        Context context2 = getApplicationContext();
+        SharedPreferences sharedPref3 = context2.getSharedPreferences(
+                "12", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor3 = sharedPref3.edit();
+        editor3.putInt("token", 12);
+        editor3.commit();
     }
 
 //    @Override
@@ -93,39 +113,45 @@ public class MainActivity extends AppCompatActivity {
         String email = ((EditText) findViewById(R.id.email_signin)).getText().toString();
         String password = ((EditText) findViewById(R.id.password_signin)).getText().toString();
 
-        String json = writeUser(email, password);
+        String json = writeUser(email, password, null);
         System.out.println(json);
-        new AsyncRestCaller().execute(json);
-
-
+        new AsyncRestCaller().execute(getString(R.string.BASE_URL) + getString(R.string.SIGN_IN), json);
     }
 
     /**
      * Called when the user signs up
      */
-    public void signUpAccount(View view) {
+    public void signUpAccount(View view) throws JSONException, IOException {
 
         String password = ((EditText) findViewById(R.id.password_signup)).getText().toString();
         String passwordAgain = ((EditText) findViewById(R.id.password_again_signup)).getText().toString();
 
-        //TODO passwords do not match
-        if (!password.equals(passwordAgain))
+        if (!password.equals(passwordAgain)) {
+            Snackbar.make(findViewById(R.id.login_coordinator_layout), getString(R.string.passwords_do_not_match),
+                    Snackbar.LENGTH_LONG)
+                    .show();
             return;
+        }
 
+        String name = ((EditText) findViewById(R.id.name_signup)).getText().toString();
         String email = ((EditText) findViewById(R.id.email_signup)).getText().toString();
 
-//        Intent intent = new Intent(this, DisplayMessageActivity.class);
-//        EditText editText = (EditText) findViewById(R.id.email);
-//        String message = editText.getText().toString();
-//        intent.putExtra(EXTRA_MESSAGE, message);
-//        startActivity(intent);
+        String json = writeUser(email, password, name);
+        System.out.println(json);
+        new AsyncRestCaller().execute(getString(R.string.BASE_URL) + getString(R.string.SIGN_UP), json);
+
     }
 
-    public String writeUser(String email, String password) throws JSONException {
+    public String writeUser(String email, String password, String name) throws JSONException {
 
         JSONObject jsonObj = new JSONObject();
-        jsonObj.put("username", email);
-        jsonObj.put("password", password);
+
+        jsonObj.put(getString(R.string.json_data_username), email);
+        jsonObj.put(getString(R.string.json_data_password), password);
+
+        if(name != null)
+            jsonObj.put(getString(R.string.json_data_name), name);
+
         return jsonObj.toString();
     }
 
@@ -153,16 +179,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class AsyncRestCaller extends AsyncTask<String, Void, Void> {
+    private class AsyncRestCaller extends AsyncTask<String, Void, JSONObject> {
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected JSONObject doInBackground(String... params) {
 
             try {
                 OkHttpClient client = new OkHttpClient();
-                RequestBody body = RequestBody.create(JSON, params[0]);
+                RequestBody body = RequestBody.create(JSON, params[1]);
                 Request request = new Request.Builder()
-                        .url(URL)
+                        .url(params[0])
                         .post(body)
                         .build();
                 Response response = null;
@@ -171,23 +197,39 @@ public class MainActivity extends AppCompatActivity {
                 String resp = response.body().string();
                 JSONObject jObj = new JSONObject(resp);
 
-                if (jObj.getBoolean("type") && jObj.getString("data") != null) {
-                    // operation successfull
-                    System.out.println(Boolean.TRUE);
-                    Intent intent = new Intent(THIS, HomeActivity.class);
-                    intent.putExtra(USERDATA, jObj.getString("data"));
-                    startActivity(intent);
-                } else
-                    System.out.println(Boolean.FALSE);
+                return jObj;
 
+            } catch (JSONException e) {
+                e.printStackTrace();
                 return null;
-                
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject result) {
+
+            try {
+
+                if (result == null || !result.getBoolean(getString(R.string.json_type)) || result.getString(getString(R.string.json_data)) == null) {
+                    Snackbar.make(findViewById(R.id.login_coordinator_layout), result.getString(getString(R.string.json_message)),
+                            Snackbar.LENGTH_LONG)
+                            .show();
+                    return;
+                }
+
+                // operation successfull
+                Intent intent = new Intent(THIS, HomeActivity.class);
+                intent.putExtra(USERDATA, result.getString(getString(R.string.json_data)));
+                startActivity(intent);
+                return;
+
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
         }
     }
 }

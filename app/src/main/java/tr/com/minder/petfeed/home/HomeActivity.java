@@ -1,5 +1,7 @@
 package tr.com.minder.petfeed.home;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -26,7 +28,18 @@ public class HomeActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        SharedPreferences sharedPref1 = this.getSharedPreferences(
+                "10", Context.MODE_PRIVATE);
+        System.out.println(sharedPref1.getInt("token", 3));
+
+        SharedPreferences sharedPref2 = this.getPreferences(Context.MODE_PRIVATE);
+        System.out.println(sharedPref2.getInt("token", 4));
+
+        Context context2 = getApplicationContext();
+        SharedPreferences sharedPref3 = context2.getSharedPreferences(
+                "12", Context.MODE_PRIVATE);
+        System.out.println(sharedPref3.getInt("token", 5));
     }
 
 }

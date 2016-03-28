@@ -25,8 +25,7 @@
         android:background="?attr/colorPrimary"
         android:elevation="6dp"
         android:minHeight="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:paddingTop="32dp"/>
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
     <!--android:layout_below="@+id/toolbar"-->
 
     <android.support.v4.view.ViewPager
