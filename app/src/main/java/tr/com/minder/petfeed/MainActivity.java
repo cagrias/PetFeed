@@ -64,46 +64,20 @@ public class MainActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new LoginOnTabSelectedListener(viewPager));
 
-        SharedPreferences sharedPref1 = this.getSharedPreferences(
-                "10", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor1 = sharedPref1.edit();
-        editor1.putInt("token", 10);
-        editor1.commit();
+        if (savedInstanceState != null && savedInstanceState.getString(getString(R.string.shared_user_session_token)) != null) {
+            // set user token to shared preferences
+            System.out.println("getting: " + savedInstanceState.getString(getString(R.string.shared_user_session_token)));
+            setSharedPreference(getString(R.string.shared_user_session),
+                    getString(R.string.shared_user_session_token),
+                    savedInstanceState.getString(getString(R.string.shared_user_session_token)));
+            startHomeActivity();
+        } else if (this.getSharedPreferences(
+                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
+                getString(getString(R.string.shared_user_session_token), null) != null) {
 
-        SharedPreferences sharedPref2 = this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor2 = sharedPref2.edit();
-        editor2.putInt("token", 11);
-        editor2.commit();
-
-        Context context2 = getApplicationContext();
-        SharedPreferences sharedPref3 = context2.getSharedPreferences(
-                "12", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor3 = sharedPref3.edit();
-        editor3.putInt("token", 12);
-        editor3.commit();
+            startHomeActivity();
+        }
     }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
 
     /**
      * Called when the user signs in
@@ -149,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         jsonObj.put(getString(R.string.json_data_username), email);
         jsonObj.put(getString(R.string.json_data_password), password);
 
-        if(name != null)
+        if (name != null)
             jsonObj.put(getString(R.string.json_data_name), name);
 
         return jsonObj.toString();
@@ -212,18 +186,29 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(JSONObject result) {
 
             try {
+                if (result == null) {
+                    Snackbar.make(findViewById(R.id.login_coordinator_layout), getString(R.string.login_error),
+                            Snackbar.LENGTH_LONG)
+                            .show();
+                    return;
+                }
 
-                if (result == null || !result.getBoolean(getString(R.string.json_type)) || result.getString(getString(R.string.json_data)) == null) {
+                if (!result.getBoolean(getString(R.string.json_type)) || result.getString(getString(R.string.json_data)) == null) {
                     Snackbar.make(findViewById(R.id.login_coordinator_layout), result.getString(getString(R.string.json_message)),
                             Snackbar.LENGTH_LONG)
                             .show();
                     return;
                 }
 
-                // operation successfull
-                Intent intent = new Intent(THIS, HomeActivity.class);
-                intent.putExtra(USERDATA, result.getString(getString(R.string.json_data)));
-                startActivity(intent);
+                // login successfull
+                JSONObject user = result.getJSONObject(getString(R.string.json_data));
+
+                // set user token to shared preferences
+                setSharedPreference(getString(R.string.shared_user_session),
+                        getString(R.string.shared_user_session_token),
+                        user.getString(getString(R.string.json_data_token)));
+
+                startHomeActivity();
                 return;
 
 
@@ -231,5 +216,19 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void startHomeActivity() {
+        Intent intent = new Intent(THIS, HomeActivity.class);
+//                intent.putExtra(USERDATA, result.getString(getString(R.string.json_data)));
+        startActivity(intent);
+    }
+
+    private void setSharedPreference(String prefName, String key, String value) {
+        SharedPreferences sharedPref = THIS.getSharedPreferences(
+                prefName, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(key, value);
+        editor.commit();
     }
 }

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">PetFeed</string>
     <string name="action_settings">Settings</string>
+    <string name="action_logout">Logout</string>
     <string name="email">Enter your e-mail</string>
     <string name="name">Name</string>
     <string name="password">Password</string>
@@ -15,8 +16,11 @@
     <string name="json_message">message</string>
     <string name="json_data_username">username</string>
     <string name="json_data_password">password</string>
+    <string name="json_data_token">token</string>
     <string name="json_data_name">name</string>
-    <string name="BASE_URL">http://192.168.1.39:8000</string>
+    <string name="shared_user_session">user_session</string>
+    <string name="shared_user_session_token">user_session_token</string>
+    <string name="BASE_URL">http://192.168.1.7:8000</string>
     <string name="SIGN_IN">/rs/login/authenticate</string>
     <string name="SIGN_UP">/rs/login/signup</string>
 
@@ -25,6 +29,7 @@
     <string name="sign_up">Sign-Up</string>
 
     <!--Alerts & messages-->
+    <string name="login_error">Error during login!</string>
     <string name="passwords_do_not_match">Passwords do not match!</string>
 
 </resources>
