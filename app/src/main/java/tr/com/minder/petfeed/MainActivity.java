@@ -28,6 +28,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import tr.com.minder.petfeed.home.HomeActivity;
 import tr.com.minder.petfeed.login.LoginPagerAdapter;
+import tr.com.minder.petfeed.session.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,19 +65,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new LoginOnTabSelectedListener(viewPager));
 
-        if (savedInstanceState != null && savedInstanceState.getString(getString(R.string.shared_user_session_token)) != null) {
-            // set user token to shared preferences
-            System.out.println("getting: " + savedInstanceState.getString(getString(R.string.shared_user_session_token)));
-            setSharedPreference(getString(R.string.shared_user_session),
-                    getString(R.string.shared_user_session_token),
-                    savedInstanceState.getString(getString(R.string.shared_user_session_token)));
-            startHomeActivity();
-        } else if (this.getSharedPreferences(
-                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
-                getString(getString(R.string.shared_user_session_token), null) != null) {
+        //savedInstanceState.getString(getString(R.string.shared_user_session_token))
 
-            startHomeActivity();
-        }
     }
 
     /**
@@ -204,8 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject user = result.getJSONObject(getString(R.string.json_data));
 
                 // set user token to shared preferences
-                setSharedPreference(getString(R.string.shared_user_session),
-                        getString(R.string.shared_user_session_token),
+                SessionManager.getInstance().setToken(getApplicationContext(),
                         user.getString(getString(R.string.json_data_token)));
 
                 startHomeActivity();
@@ -222,13 +211,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(THIS, HomeActivity.class);
 //                intent.putExtra(USERDATA, result.getString(getString(R.string.json_data)));
         startActivity(intent);
+        finish();
     }
 
-    private void setSharedPreference(String prefName, String key, String value) {
-        SharedPreferences sharedPref = THIS.getSharedPreferences(
-                prefName, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(key, value);
-        editor.commit();
-    }
+
 }

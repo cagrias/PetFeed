@@ -1,6 +1,7 @@
 package tr.com.minder.petfeed.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -11,7 +12,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import tr.com.minder.petfeed.MainActivity;
 import tr.com.minder.petfeed.R;
+import tr.com.minder.petfeed.session.SessionManager;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -38,16 +41,16 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        SharedPreferences sharedPref = this.getSharedPreferences(
-                getString(R.string.shared_user_session), Context.MODE_PRIVATE);
-        String token_shared = sharedPref.getString(getString(R.string.shared_user_session_token), null);
+        String token_shared = SessionManager.getInstance().checkSession(getApplicationContext());
 
-        System.out.println(token_shared);
-
-        if (token_shared == null && token_saved == null) {
-            finish();
+        if (token_shared != null)
+            System.out.println(token_shared);
+        else {
+            startLoginActivity();
         }
+
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -90,24 +93,27 @@ public class HomeActivity extends AppCompatActivity {
 
     private void logout() {
 
-        SharedPreferences sharedPref = this.getSharedPreferences(
-                getString(R.string.shared_user_session), Context.MODE_PRIVATE);
-        sharedPref.edit().remove(getString(R.string.shared_user_session_token)).commit();
-
-        finish();
+        SessionManager.getInstance().unsetToken(getApplicationContext());
+        startLoginActivity();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        // Save the user's current session
-        savedInstanceState.putString(getString(R.string.shared_user_session_token), this.getSharedPreferences(
-                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
-                getString(getString(R.string.shared_user_session_token), null));
-        System.out.println("saving: " + this.getSharedPreferences(
-                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
-                getString(getString(R.string.shared_user_session_token), null));
-        // Always call the superclass so it can save the view hierarchy state
-        super.onSaveInstanceState(savedInstanceState);
+//    @Override
+//    public void onSaveInstanceState(Bundle savedInstanceState) {
+//        // Save the user's current session
+//        savedInstanceState.putString(getString(R.string.shared_user_session_token), this.getSharedPreferences(
+//                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
+//                getString(getString(R.string.shared_user_session_token), null));
+//        System.out.println("saving: " + this.getSharedPreferences(
+//                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
+//                getString(getString(R.string.shared_user_session_token), null));
+//        // Always call the superclass so it can save the view hierarchy state
+//        super.onSaveInstanceState(savedInstanceState);
+//    }
+
+    private void startLoginActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 }
