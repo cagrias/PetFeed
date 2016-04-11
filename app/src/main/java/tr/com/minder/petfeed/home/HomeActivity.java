@@ -15,6 +15,7 @@ import android.view.View;
 import tr.com.minder.petfeed.MainActivity;
 import tr.com.minder.petfeed.R;
 import tr.com.minder.petfeed.session.SessionManager;
+import tr.com.minder.petfeed.settings.SettingsActivity;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -41,14 +42,10 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        String token_shared = SessionManager.getInstance().checkSession(getApplicationContext());
+        String token_shared = SessionManager.getInstance().checkSession(this);
 
-        if (token_shared != null)
-            System.out.println(token_shared);
-        else {
-            startLoginActivity();
-        }
-
+        if(token_shared == null)
+            finish();
     }
 
     @Override
@@ -79,7 +76,8 @@ public class HomeActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         }
 
         //noinspection SimplifiableIfStatement
@@ -92,28 +90,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void logout() {
-
-        SessionManager.getInstance().unsetToken(getApplicationContext());
-        startLoginActivity();
-    }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle savedInstanceState) {
-//        // Save the user's current session
-//        savedInstanceState.putString(getString(R.string.shared_user_session_token), this.getSharedPreferences(
-//                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
-//                getString(getString(R.string.shared_user_session_token), null));
-//        System.out.println("saving: " + this.getSharedPreferences(
-//                getString(R.string.shared_user_session), Context.MODE_PRIVATE).
-//                getString(getString(R.string.shared_user_session_token), null));
-//        // Always call the superclass so it can save the view hierarchy state
-//        super.onSaveInstanceState(savedInstanceState);
-//    }
-
-    private void startLoginActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        SessionManager.getInstance().unsetToken(this);
         finish();
     }
+
 
 }

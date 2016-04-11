@@ -1,9 +1,10 @@
 package tr.com.minder.petfeed.session;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 
+import tr.com.minder.petfeed.MainActivity;
 import tr.com.minder.petfeed.R;
 
 /**
@@ -38,7 +39,18 @@ public class SessionManager {
 
         token_shared = sharedPref.getString(ctx.getString(R.string.shared_user_session_token), null);
 
+        if (token_shared != null)
+            System.out.println(token_shared);
+        else
+            startLoginActivity(ctx);
+
         return token_shared;
+    }
+
+    private void startLoginActivity(Context ctx) {
+
+        Intent intent = new Intent(ctx, MainActivity.class);
+        ctx.startActivity(intent);
     }
 
     public void unsetToken(Context ctx) {
@@ -47,5 +59,7 @@ public class SessionManager {
                 ctx.getString(R.string.shared_user_session), Context.MODE_PRIVATE);
 
         sharedPref.edit().remove(ctx.getString(R.string.shared_user_session_token)).commit();
+
+        startLoginActivity(ctx);
     }
 }

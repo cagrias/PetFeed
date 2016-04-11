@@ -65,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new LoginOnTabSelectedListener(viewPager));
 
-        //savedInstanceState.getString(getString(R.string.shared_user_session_token))
-
     }
 
     /**
@@ -194,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject user = result.getJSONObject(getString(R.string.json_data));
 
                 // set user token to shared preferences
-                SessionManager.getInstance().setToken(getApplicationContext(),
+                SessionManager.getInstance().setToken(THIS,
                         user.getString(getString(R.string.json_data_token)));
 
                 startHomeActivity();
