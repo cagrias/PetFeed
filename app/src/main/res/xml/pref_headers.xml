@@ -3,18 +3,30 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="tr.com.minder.petfeed.settings.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="tr.com.minder.petfeed.settings.SettingsActivity$SettingsFragment"
         android:icon="@drawable/ic_info_black_24dp"
-        android:title="@string/pref_header_general" />
+        android:title="@string/pref_header_general">
+        <extra
+            android:name="@string/pref_header_settings"
+            android:value="@string/pref_header_general"/>
+    </header>
 
     <header
-        android:fragment="tr.com.minder.petfeed.settings.SettingsActivity$NotificationPreferenceFragment"
+        android:fragment="tr.com.minder.petfeed.settings.SettingsActivity$SettingsFragment"
         android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/pref_header_notifications" />
+        android:title="@string/pref_header_notifications">
+        <extra
+            android:name="@string/pref_header_settings"
+            android:value="@string/pref_header_notifications"/>
+    </header>
 
     <header
-        android:fragment="tr.com.minder.petfeed.settings.SettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="tr.com.minder.petfeed.settings.SettingsActivity$SettingsFragment"
         android:icon="@drawable/ic_sync_black_24dp"
-        android:title="@string/pref_header_data_sync" />
+        android:title="@string/pref_header_data_sync">
+        <extra
+            android:name="@string/pref_header_settings"
+            android:value="@string/pref_header_data_sync"/>
+    </header>
 
 </preference-headers>
